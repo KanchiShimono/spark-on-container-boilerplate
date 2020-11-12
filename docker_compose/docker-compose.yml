@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  jupyter:
+    image: kanchishimono/pyspark-jupyter:master
+    env_file: .env
+    volumes:
+      - ./spark-events:/tmp/spark-events
+      - ./notebooks:/home/spark/notebooks
+    ports:
+      - 8888:8888
+      - 4040:4040
+
+  master:
+    image: kanchishimono/pyspark:master
+    env_file: .env
+    ports:
+      - 8080:8080
+    command:
+      ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
+
+  worker:
+    image: kanchishimono/pyspark:master
+    depends_on:
+      - master
+    env_file: .env
+    environment:
+      - SPARK_WORKER_WEBUI_PORT=8081
+    ports:
+      - 8081:8081
+    command:
+      [
+        "/opt/spark/bin/spark-class",
+        "org.apache.spark.deploy.worker.Worker",
+        "spark://${SPARK_MASTER_HOST}:${SPARK_MASTER_PORT}",
+      ]
+
+  history-server:
+    image: kanchishimono/spark:master
+    env_file: .env
+    volumes:
+      - ./spark-events:/tmp/spark-events
+    ports:
+      - 18080:18080
+    entrypoint: ["/opt/history-server-entrypoint.sh"]
