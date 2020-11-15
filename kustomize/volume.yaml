@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: home-nfs-pv
+  labels:
+    role: home
+spec:
+  storageClassName: hostpath
+  hostPath:
+    path: /tmp/nfs/home
+    type: DirectoryOrCreate
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 3Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: data-nfs-pv
+  labels:
+    role: data
+spec:
+  storageClassName: hostpath
+  hostPath:
+    path: /tmp/nfs/data
+    type: DirectoryOrCreate
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: home-nfs-pvc
+spec:
+  storageClassName: hostpath
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+  selector:
+    matchLabels:
+      role: home
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-nfs-pvc
+spec:
+  storageClassName: hostpath
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  selector:
+    matchLabels:
+      role: data

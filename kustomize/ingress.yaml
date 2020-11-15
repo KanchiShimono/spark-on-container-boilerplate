@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress
+  labels:
+    app: workspace
+spec:
+  rules:
+    - host: jupyter-lab.localhost
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: svc
+              servicePort: 8888
+    - host: spark-ui.localhost
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: svc
+              servicePort: 4040
+    - host: history-server.localhost
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: svc
+              servicePort: 18080
