@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment
+  labels:
+    app: workspace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workspace
+  template:
+    metadata:
+      name: workspace
+      labels:
+        app: workspace
+    spec:
+      containers:
+        - name: jupyter-lab
+          image: kanchishimono/pyspark-jupyter:master
+          resources:
+            limits:
+              memory: 1Gi
+              cpu: 1
+          env:
+            - name: JUPYTER_TOKEN
+              value: mytoken
+          ports:
+            - containerPort: 8888
+            - containerPort: 4040
+          volumeMounts:
+            - mountPath: /home/spark
+              name: home-volume
+            - mountPath: /mnt/data
+              name: data-volume
+            - mountPath: /opt/spark/conf
+              name: spark-conf
+            - mountPath: /tmp/spark-events
+              name: spark-event-log
+        - name: history-server
+          image: kanchishimono/spark:master
+          resources:
+            limits:
+              memory: 1Gi
+              cpu: 1
+          command: ["/opt/history-server-entrypoint.sh"]
+          env:
+            - name: EVENT_LOG_DIR
+              value: file:/tmp/spark-events
+          ports:
+            - containerPort: 18080
+          volumeMounts:
+            - mountPath: /tmp/spark-events
+              name: spark-event-log
+      initContainers:
+        - name: init-home-volume
+          image: busybox:1.32
+          command: ["sh", "-c", "chmod 777 /mnt/vol"]
+          volumeMounts:
+            - mountPath: /mnt/vol
+              name: home-volume
+        - name: init-data-volume
+          image: busybox:1.32
+          command: ["sh", "-c", "chmod 777 /mnt/vol"]
+          volumeMounts:
+            - mountPath: /mnt/vol
+              name: data-volume
+      volumes:
+        - name: home-volume
+          persistentVolumeClaim:
+            claimName: home-nfs-pvc
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: data-nfs-pvc
+        - name: spark-conf
+          configMap:
+            name: spark-conf
+        - name: spark-event-log
+          emptyDir: {}

@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spark-conf
+data:
+  spark-defaults.conf: |
+    spark.master k8s://https://kubernetes.default.svc.cluster.local:443
+    spark.driver.host spark-svc.spark.svc.cluster.local
+    spark.port.maxRetries 16
+    spark.ui.enabled True
+    spark.ui.port 4040
+    spark.eventLog.compress True
+    spark.eventLog.enabled True
+    spark.eventLog.dir file:/tmp/spark-events
+    spark.history.fs.logDirectory file:/tmp/spark-events
+    spark.history.ui.port 18080
+
+    spark.sql.execution.arrow.maxRecordsPerBatch 10000
+    spark.storage.level MEMORY_AND_DISK_SER
+    spark.rdd.compress true
+    spark.shuffle.compress true
+    spark.shuffle.spill.compress true
+    spark.serializer org.apache.spark.serializer.KryoSerializer
+
+    spark.driver.extraJavaOptions -XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35
+    spark.executor.extraJavaOptions -XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35
+
+    spark.kubernetes.pyspark.pythonVersion 3
+    spark.kubernetes.container.image kanchishimono/pyspark:master
+    spark.kubernetes.container.image.pullPolicy Always
+    spark.kubernetes.namespace spark
+    spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-volume.mount.path /mnt/data
+    spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-volume.options.claimName spark-data-nfs-pvc
+
+    spark.shuffle.service.enabled False
+    spark.dynamicAllocation.enabled True
+    spark.dynamicAllocation.shuffleTracking.enabled True
+    spark.dynamicAllocation.initialExecutors 1
+    spark.dynamicAllocation.minExecutors 0
+    spark.dynamicAllocation.maxExecutors 2
+    spark.dynamicAllocation.cachedExecutorIdleTimeout 30m
