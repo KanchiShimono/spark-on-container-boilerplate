@@ -15,6 +15,7 @@ spec:
       labels:
         app: workspace
     spec:
+      serviceAccountName: common-spark-sa
       containers:
         - name: jupyter-lab
           image: kanchishimono/pyspark-jupyter:master
