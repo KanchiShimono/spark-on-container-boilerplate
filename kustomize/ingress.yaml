@@ -6,21 +6,21 @@ metadata:
     app: workspace
 spec:
   rules:
-    - host: jupyter-lab.localhost
+    - host: jupyter-lab.local
       http:
         paths:
           - path: /
             backend:
               serviceName: svc
               servicePort: 8888
-    - host: spark-ui.localhost
+    - host: spark-ui.local
       http:
         paths:
           - path: /
             backend:
               serviceName: svc
               servicePort: 4040
-    - host: history-server.localhost
+    - host: history-server.local
       http:
         paths:
           - path: /
